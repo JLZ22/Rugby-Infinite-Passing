@@ -1491,5 +1491,5 @@ No oscillations for 1000 players.
 
 -------------------------
 
-Line 2: 18 player counts result in no oscillations
-Lines 3-100: 14 player counts result in no oscillations
+Line 2: 18 unique player counts result in no oscillations
+Lines 3-100: 14 unique player counts result in no oscillations
