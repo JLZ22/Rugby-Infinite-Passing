@@ -2,8 +2,8 @@ import utils
 import argparse
 
 class Player: 
-  def __init__(self, currentLine: int, id):
-    self.id = id
+  def __init__(self, currentLine: int, player_id: int):
+    self.id = player_id
     self.hasBall = False
     self.currentLine = currentLine
     self.previousLine = None
@@ -19,7 +19,7 @@ class Drill:
     self.direction = 'right'
     self.startingLine = 0 # The line that starts with the ball
     self.lineWithBall = 0 # The line that has the ball
-    self.lines = [[] for i in range(numLines)] # array of lines
+    self.lines = [[] for _ in range(numLines)] # array of lines
     self.has_oscillators = False
     self.buildLines() # Distribute players into lines
     
