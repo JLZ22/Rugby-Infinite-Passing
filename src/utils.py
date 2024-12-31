@@ -1,3 +1,9 @@
+import pygame
+from pygame import Color
+from typing import Union, Tuple, Sequence
+
+ColorValue = Union[Color, int, str, Tuple[int, int, int], Tuple[int, int, int, int], Sequence[int]]
+
 def underlineText(text):
     return f"\033[4m{text}\033[0m"
 
@@ -99,3 +105,20 @@ def formatItalic(text):
 
 def formatStrike(text):
     return f"\033[9m{text}\033[0m"
+
+def tint_image(surface: pygame.Surface, color: ColorValue) -> pygame.Surface:
+    '''Tint the color of the given image. This is an inplace operation.
+
+    Args:
+        surface (pygame.Surface): The image to be tinted. 
+        color (ColorValue): The target color.
+
+    Returns:
+        pygame.Surface: A surface that is the tinted image.
+    '''
+    w, h = surface.get_size()
+    r, g, b, = color[0], color[1], color[2]
+    for x in range(w):
+        for y in range(h):
+            a = surface.get_at((x, y))[3]
+            surface.set_at((x, y), pygame.Color(r, g, b, a))
