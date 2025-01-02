@@ -1,10 +1,9 @@
 import pygame
 from pygame.locals import *
 import sys
-import utils
+import Utils
 from SimulationObject import SimulationObject
 from Player import Player
-import utils
 
 BLUE  = (0, 0, 255)
 RED   = (255, 0, 0)
@@ -46,55 +45,95 @@ class Drill:
         self.has_oscillators = False # Flag to check if any player has oscillated
         self.lines = [[] for _ in range(num_lines)]
         self.ball = SimulationObject('../assets/ball.png', 0, 0, speed)
-        utils.tint_image(self.ball.image, WHITE)
+        Utils.tint_image(self.ball.image, WHITE)
         self.init_lines()
         
-    def run(self, num_iterations: int = 10, verbose: bool = True):        
-        '''Runs the drill simulation for a specified number of iterations.
+    def run(self, total_passes: int = 10, verbose: bool = True, display: bool = True):        
+        '''Runs the drill simulation for a specified number of passes.
 
         Args:
-            num_iterations (int, optional): The number of iterations that the drill is run. Defaults to 10.
-            verbose (bool, optional): Whether to print the drill state at each iteration. Defaults to True.
+            total_passes (int, optional): The number of passes that the drill is run. Defaults to 10.
+            verbose (bool, optional): Whether to print the oscillation info after finishing the drill. Defaults to True.
+            display (bool, optional): Whether to display the pygame simulation. Defaults to True.
         '''
-        iteration = 0
-        while True:      
-            if iteration > num_iterations:
-                self.quit(num_iterations, verbose)
-                
-            key = pygame.key.get_pressed()
-            if key[K_SPACE] or key[K_q]:
-                self.quit(num_iterations, verbose)
+        num_passes_completed = 0
+        if display:
+            num_passes_completed = self._run_with_display(total_passes)
+        else:
+            self._run_without_display(total_passes)
+            num_passes_completed = total_passes
+        
+        if verbose:
+            self.print_oscillations(num_passes_completed)
             
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    self.quit(num_iterations, verbose)       
+    def _run_with_display(self, total_passes: int) -> int:
+        '''Run the drill with the pygame simulation.
+
+        Args:
+            total_passes (int): The number of passes the drill is run for.
+            
+        Returns:
+            int: The number of passes that were completed before the simulation was stopped.
+        '''
+        pass_count = 0
+        while True:      
+            if self.check_exit_conditions(total_passes, pass_count):
+                pygame.quit()
+                break
             
             if self.ball_moving:
                 self.ball_moving = self.ball.move()
             elif self.players_moving:
                 self.move_all_players()
+                
+                # move_all_players modifies self.players_moving
+                if not self.players_moving:
+                    pass_count += 1
             else:
-                self.pass_ball(iteration)
-                iteration += 1
+                self.pass_ball(pass_count, display=True)
                     
             self.surface.fill(BG_COLOR)            
             self.draw_all()
             pygame.display.update()
             self.fps.tick(30)
             
-    def quit(self,  num_iterations: int = -1, verbose: bool = False):
-        '''Quit the pygame simulation.
+        return pass_count
+
+    def _run_without_display(self, total_passes: int):
+        '''Runs the simulation without the pygame display.
 
         Args:
-            num_iterations (int, optional): The number of iterations in the drill has run for. Defaults to -1.
-            verbose (bool, optional): True to print oscillation information; False otherwise. Defaults to False.
+            total_passes (int): The number of passes the drill is run for.
         '''
-        if verbose:
-            assert num_iterations > 0 , "Number of iterations must be greater than 0"
-            self.print_oscillations(num_iterations)
-        pygame.quit()
-        sys.exit()
-    
+        for i in range(total_passes):
+            self.pass_ball(i, display=False)
+
+    def check_exit_conditions(self, total_passes: int, curr_pass_count: int) -> bool:
+        '''Checks if any of the following exit condiitons are fulfilled:
+            - The number of passes has been completed.
+            - The user has pressed the space bar or 'q' key to exit the simulation.
+            - The user has clicked the close button on the pygame window.
+
+        Args:
+            total_passes (int): The total number of passes the drill is run for.
+            curr_pass_count (int): The current number of passes that have been completed.
+
+        Returns:
+            bool: True if any of the exit conditions are fulfilled, False otherwise.
+        '''
+        if curr_pass_count >= total_passes:
+            pygame.event.post(pygame.event.Event(QUIT))
+            
+        key = pygame.key.get_pressed()
+        if key[K_SPACE] or key[K_q]:
+            pygame.event.post(pygame.event.Event(QUIT))
+        
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                return True
+        
+        return False
+        
     def init_lines(self):
         '''Instantiate the players and distribute them into lines from left to right.
         '''
@@ -152,45 +191,55 @@ class Drill:
         else:
             self.direction = 'left'
             
-    def pass_ball(self, iteration: int):
+    def pass_ball(self, pass_count: int, display: bool):
         '''Pass the ball to the next line.
 
         Args:
-            iteration (int): The current iteration of the drill.
+            pass_count (int): The current number of passes that have been made.
+            display (bool): Whether to set the path for simulation objects to move in the Pygame display.
         '''
         if self.is_last_line():
             self.flip_direction()
 
-        if self.direction == 'left':
-            self.move_player_to_next_line(self.line_with_ball, self.line_with_ball - 1, iteration)
-        else:
-            self.move_player_to_next_line(self.line_with_ball, self.line_with_ball + 1, iteration)
+        next_line = self.line_with_ball - 1 if self.direction == 'left' else self.line_with_ball + 1
+        self._move_player_to_next_line(self.line_with_ball, next_line, pass_count, display)
             
-    def move_player_to_next_line(self, curr_line: int, next_line: int, curr_iteration: int):
+    def _move_player_to_next_line(self, curr_line: int, next_line: int, curr_pass_count: int, display: bool):
         '''Move the first player in the current line to the end of the next line 
         based on the direction of the drill.
 
         Args:
             curr_line (int): The index of the current line.
             next_line (int): The index of the next line.
-            curr_iteration (int): The current iteration of the drill.
+            curr_pass_count (int): The current number of passes that have been made.
+            display (bool): Whether to set the path for simulation objects to move in the Pygame display.
         '''
         assert self.lines[next_line], f"Line {next_line + 1} is empty! Player in line {curr_line + 1} is passing to no one!"
         assert self.lines[curr_line], f"Line {curr_line + 1} is empty! Player in line {next_line + 1} is recieving from no one!"
         assert next_line != curr_line, "Player cannot pass to their current line!"
         
         player = self.lines[curr_line][0]
-        direction = 'right' if next_line > curr_line else 'left'
         
-        # set path for player to move to the target line in the lists
-        target_x = self.lines[next_line][-1].rect.center[0]
-        target_y = self.lines[next_line][-1].rect.center[1] + ROW_GAP
-        player.set_path(target_x, target_y)
-        
-        # set the path for the ball to move in the Pygame display
-        next_first = self.lines[next_line][0]
-        ball_x, ball_y = next_first.rect.center[0], next_first.rect.center[1]
-        self.ball.set_path(ball_x, ball_y)
+        # update paths for Pygame display
+        if display:
+            # set path for player to move to the target line in the lists
+            target_x = self.lines[next_line][-1].rect.center[0]
+            target_y = self.lines[next_line][-1].rect.center[1] + ROW_GAP
+            print(player.rect.center)
+            print(target_x, target_y)
+            player.set_path(target_x, target_y)
+            
+            # set the path for the ball to move in the Pygame display
+            next_first = self.lines[next_line][0]
+            ball_x, ball_y = next_first.rect.center[0], next_first.rect.center[1]
+            self.ball.set_path(ball_x, ball_y)
+            
+            # set path to shift all the players in the previous line up except the player who is passing
+            for p in self.lines[curr_line][1:]:
+                p.set_path(p.rect.center[0], p.rect.center[1] - ROW_GAP)
+                
+            self.players_moving = True
+            self.ball_moving = True
         
         # move the player in the array representation of the drill
         player.has_ball = False
@@ -203,7 +252,7 @@ class Drill:
         if (not (curr_line == 0 or curr_line == self.num_lines - 1) and
             player.previous_line == next_line):
             if player.oscillation_count == 0:
-                player.iteration_of_first_oscillation = curr_iteration
+                player.pass_count_of_first_oscillation = curr_pass_count
 
             self.has_oscillators = True
             player.oscillation_count += 1
@@ -212,29 +261,25 @@ class Drill:
         player.previous_line = player.curr_line
         player.curr_line = next_line
         
-        # shift all the players in the previous line up
-        for p in self.lines[curr_line]:
-            p.set_path(p.rect.center[0], p.rect.center[1] - ROW_GAP)
         
-        self.players_moving = True
-        self.ball_moving = True
-        
-    def print_oscillations(self, total_iterations: int = 10):
+    def print_oscillations(self, total_passes: int = 10):
         '''Print information on oscillations that occurred during the drill.
 
         Args:
-            total_iterations (int, optional): The total number of iterations the drill was run. Defaults to 10.
+            total_passes (int, optional): The total number of passes the drill was run. Defaults to 10.
         '''
+        Utils.printCyan(f"Total passes: {total_passes}")
+        
         players = self.get_and_sort_players()
         for player in players:
             if player.oscillation_count > 0:
-                percentage = player.oscillation_count / total_iterations * 100
+                percentage = player.oscillation_count / total_passes * 100
                 percentage_str = f'{percentage:.1f}'
-                s = f"Player {player.id:>3} oscillated {player.oscillation_count:>4} times ({percentage_str:>5}% of the drill). Their first oscillation was on iteration {player.iteration_of_first_oscillation:>3}."
+                s = f"Player {player.id:>3} oscillated {player.oscillation_count:>4} times ({percentage_str:>5}% of the drill). Their first oscillation was on pass {player.pass_count_of_first_oscillation:>3}."
                 
-                utils.printRed(s) if percentage >= 2 else utils.printGreen(s)
+                Utils.printRed(s) if percentage >= 2 else Utils.printGreen(s)
             else:
-                utils.printGreen(f"Player {player.id} did not oscillate.")
+                Utils.printGreen(f"Player {player.id} did not oscillate.")
 
     def get_and_sort_players(self) -> list:
         '''Get all the players in the drill and sort them by id.
@@ -251,4 +296,4 @@ class Drill:
                 
 if __name__ == "__main__":
     drill = Drill(speed=10)
-    drill.run(10)
+    drill.run(4, display=True)
