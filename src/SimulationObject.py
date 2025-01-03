@@ -7,14 +7,13 @@ class SimulationObject(pygame.sprite.Sprite):
         pygame (Sprite): A sprite object from pygame.
     '''
 
-    def __init__(self, img_path: str, x: int, y: int, speed: int = 5):
+    def __init__(self, img_path: str, x: int, y: int):
         '''Constructor for SimulationObject.
 
         Args:
             img_path (str): The path to the image to be displayed for this sprite. 
             x (int): Starting x position.
             y (int): Starting y position.
-            speed (int, optional): The speed at which this sprite will move. Defaults to 5.
         '''
         super().__init__()
         
@@ -22,7 +21,6 @@ class SimulationObject(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(img, (25, 25))
         self.rect = self.image.get_rect()
         self.rect.center = self.target = (x,y)
-        self.speed = speed
         self.path = []
         
     def set_path(self, target_x: int, target_y: int, split_ratio: float=0.5):
@@ -52,8 +50,11 @@ class SimulationObject(pygame.sprite.Sprite):
         ]
         self.target = self.path.pop(0)
         
-    def move(self) -> bool:
+    def move(self, speed: int) -> bool:
         '''Move according to the path defined in 'self.path'. 
+
+        Args:
+            speed (int): The speed at which to move.
 
         Returns:
             bool: True if there are still instructions in the path array, otherwise False.
@@ -69,15 +70,15 @@ class SimulationObject(pygame.sprite.Sprite):
         dy = target_y - current_y
         distance = (dx**2 + dy**2) ** 0.5
 
-        if distance <= self.speed:
+        if distance <= speed:
             self.rect.center = self.target
             if self.path:
                 self.target = self.path.pop(0)
             else:
                 self.target = None
         else:
-            step_x = self.speed * (dx / distance)
-            step_y = self.speed * (dy / distance)
+            step_x = speed * (dx / distance)
+            step_y = speed * (dy / distance)
             self.rect.move_ip(step_x, step_y)
 
         return True  # Still moving

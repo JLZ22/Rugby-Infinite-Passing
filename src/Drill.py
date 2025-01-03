@@ -12,14 +12,13 @@ COL_GAP = 80
 class Drill:
     '''Manages the players in the drill and runs the pygame simulation.
     '''
-    def __init__(self, num_lines: int = 4, num_players: int = 15, starting_line: int = 0, speed: int = 5):
+    def __init__(self, num_lines: int = 4, num_players: int = 15, starting_line: int = 0):
         '''Constructs a drill.
 
         Args:
             num_lines (int, optional): Number of lines in the drill. Defaults to 4.
             num_players (int, optional): Total number of players in the drill. Defaults to 15.
             starting_line (int, optional): The index of the line that starts with the ball. Defaults to 0.
-            player_speed (int, optional): The speed of the players in the drill. Defaults to 5.
         '''
         # Pygame attributes/setup
         pygame.init()
@@ -36,25 +35,25 @@ class Drill:
         self.num_players = num_players
         self.direction = 'right'
         self.starting_line = self.line_with_ball = starting_line
-        self.speed = speed
         self.has_oscillators = False # Flag to check if any player has oscillated
         self.moving_players = [] # List of players whose paths have been changed
         self.lines = [[] for _ in range(num_lines)]
-        self.ball = SimulationObject('../assets/ball.png', 0, 0, speed)
+        self.ball = SimulationObject('../assets/ball.png', 0, 0)
         Utils.tint_image(self.ball.image, THECOLORS['white'])
         self.init_lines()
         
-    def run(self, total_passes: int = 10, verbose: bool = True, display: bool = True):        
+    def run(self, total_passes: int = 10, verbose: bool = True, display: bool = True, speed: int = 5):        
         '''Runs the drill simulation for a specified number of passes.
 
         Args:
             total_passes (int, optional): The number of passes that the drill is run. Defaults to 10.
             verbose (bool, optional): Whether to print the oscillation info after finishing the drill. Defaults to True.
             display (bool, optional): Whether to display the pygame simulation. Defaults to True.
+            speed (int, optional): The speed of the players in the drill. Defaults to 5.
         '''
         num_passes_completed = 0
         if display:
-            num_passes_completed = self._run_with_display(total_passes)
+            num_passes_completed = self._run_with_display(total_passes, speed)
         else:
             self._run_without_display(total_passes)
             num_passes_completed = total_passes
@@ -62,11 +61,12 @@ class Drill:
         if verbose:
             self.print_oscillations(num_passes_completed)
             
-    def _run_with_display(self, total_passes: int) -> int:
+    def _run_with_display(self, total_passes: int, speed: int) -> int:
         '''Run the drill with the pygame simulation.
 
         Args:
             total_passes (int): The number of passes the drill is run for.
+            speed (int): The speed of the players in the drill.
             
         Returns:
             int: The number of passes that were completed before the simulation was stopped.
@@ -78,9 +78,9 @@ class Drill:
                 break
             
             if self.ball_moving:
-                self.ball_moving = self.ball.move()
+                self.ball_moving = self.ball.move(speed)
             elif self.players_moving:
-                self.move_players()
+                self.move_players(speed)
                 
                 # move_players modifies self.players_moving
                 if not self.players_moving:
@@ -146,7 +146,6 @@ class Drill:
                     y=(row * ROW_GAP + 100), 
                     player_id=pid, 
                     curr_line=col, 
-                    speed=self.speed
                     )
                 self.lines[col].append(p)
                 pid += 1
@@ -160,12 +159,15 @@ class Drill:
         self.players.draw(self.surface)
         self.ball.draw(self.surface)
         
-    def move_players(self):
+    def move_players(self, speed: int):
         '''Move all the players in the moving_players list.
+        
+        Args:
+            speed (int): The speed of the players in the drill
         '''
         moving = False
         for player in self.moving_players:
-            still_moving = player.move()
+            still_moving = player.move(speed)
             if still_moving:
                 moving = True
                 
