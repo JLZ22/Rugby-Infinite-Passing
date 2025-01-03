@@ -8,17 +8,26 @@ from SimulationObject import SimulationObject
 
 ROW_GAP = 50
 COL_GAP = 80
+RGB = tuple[int, int, int]
+RGBA = tuple[int, int, int, int]
 
 class Drill:
     '''Manages the players in the drill and runs the pygame simulation.
     '''
-    def __init__(self, num_lines: int = 4, num_players: int = 15, starting_line: int = 0):
+    def __init__(
+        self, 
+        num_lines: int = 4, 
+        num_players: int = 15, 
+        starting_line: int = 0, 
+        player_tints: dict[int, RGB | RGBA] = {}
+        ):
         '''Constructs a drill.
 
         Args:
             num_lines (int, optional): Number of lines in the drill. Defaults to 4.
             num_players (int, optional): Total number of players in the drill. Defaults to 15.
             starting_line (int, optional): The index of the line that starts with the ball. Defaults to 0.
+            player_tints (dict[int, RGB | RGBA], optional): A dictionary of player ids and their respective tints. Defaults to {}.
         '''
         # Pygame attributes/setup
         pygame.init()
@@ -40,7 +49,7 @@ class Drill:
         self.lines = [[] for _ in range(num_lines)]
         self.ball = SimulationObject('../assets/ball.png', 0, 0)
         Utils.tint_image(self.ball.image, THECOLORS['white'])
-        self.init_lines()
+        self.init_lines(player_tints)
         
     def run(self, total_passes: int = 10, verbose: bool = True, display: bool = True, speed: int = 5):        
         '''Runs the drill simulation for a specified number of passes.
@@ -130,26 +139,43 @@ class Drill:
         
         return False
         
-    def init_lines(self):
+    def init_lines(self, player_tints: dict[int, RGB | RGBA]):
         '''Instantiate the players and distribute them into lines from left to right.
+        Colors the players based on the player_tints dictionary. Ignores any player ids 
+        that are not in the dictionary and any ids that are not associated with players.
+        
+        Args:
+            player_tints (dict[int, RGB | RGBA]): A dictionary of player ids and their respective tints.
         '''
         self.players = pygame.sprite.Group()
-        pid = 1 # 1 indexed player id
+        pid = 0
         num_rows = self.num_players // self.num_lines
+        if self.num_players % self.num_lines != 0:
+            num_rows += 1
         
-        for col in range(self.num_lines):
-            for row in range(num_rows + 1):
+        for row in range(num_rows):
+            for col in range(self.num_lines):
+                # check that we don't add more players than the specified number
                 if (pid > self.num_players):
                     break
+                
+                # initialize player
                 p = Player(
                     x=(col * COL_GAP + 100), 
                     y=(row * ROW_GAP + 100), 
                     player_id=pid, 
                     curr_line=col, 
                     )
+                
+                # tint the player image if a tint is specified
+                if pid in player_tints.keys():
+                    Utils.tint_image(p.image, player_tints[pid])
+                
+                # add player to the Pygame sprite group and the lines list
                 self.lines[col].append(p)
                 pid += 1
                 self.players.add(p)
+                
         self.lines[self.starting_line][0].has_ball = True
         self.ball.rect.center = self.lines[self.starting_line][0].rect.center
         
@@ -273,7 +299,7 @@ class Drill:
             if player.oscillation_count > 0:
                 percentage = player.oscillation_count / total_passes * 100
                 percentage_str = f'{percentage:.1f}'
-                s = f"Player {player.id:>3} oscillated {player.oscillation_count:>4} times ({percentage_str:>5}% of the drill). Their first oscillation was on pass {player.pass_count_of_first_oscillation:>3}."
+                s = f"Player {player.id:>3} oscillated {player.oscillation_count:>4} times ({percentage_str:>5}% of the drill ). Their first oscillation was on pass {player.pass_count_of_first_oscillation:>3}."
                 
                 Utils.printRed(s) if percentage >= 2 else Utils.printGreen(s)
             else:
