@@ -1,5 +1,5 @@
 import pygame
-import Utils
+import utils
 
 from Player import Player
 from pygame.locals import *
@@ -48,7 +48,7 @@ class Drill:
         self.moving_players = [] # List of players whose paths have been changed
         self.lines = [[] for _ in range(num_lines)]
         self.ball = SimulationObject('../assets/ball.png', 0, 0)
-        Utils.tint_image(self.ball.image, THECOLORS['orange'])
+        utils.tint_image(self.ball.image, THECOLORS['orange'])
         self.init_lines(player_tints)
         
     def run(self, total_passes: int = 10, verbose: bool = True, display: bool = True, speed: int = 5):        
@@ -82,16 +82,19 @@ class Drill:
         '''
         pass_count = 0
         while True:                  
+            dt = self.clock.tick(30) / 1000
+            adjusted_speed = speed * dt
+            
             if self.check_exit_conditions(total_passes, pass_count):
                 pygame.quit()
                 break
             
             if self.ball_moving:
-                self.ball_moving = self.ball.move(speed )
+                self.ball_moving = self.ball.update(adjusted_speed)
             elif self.players_moving:
-                self.move_players(speed)
+                self.update_players(adjusted_speed)
                 
-                # move_players modifies self.players_moving
+                # update_players modifies self.players_moving
                 if not self.players_moving:
                     pass_count += 1
             else:
@@ -101,7 +104,6 @@ class Drill:
                     
             self.draw_all()
             pygame.display.flip()
-            self.clock.tick(30)
             
         return pass_count
 
@@ -170,7 +172,7 @@ class Drill:
                 
                 # tint the player image if a tint is specified
                 if pid in player_tints.keys():
-                    Utils.tint_image(p.image, player_tints[pid])
+                    utils.tint_image(p.image, player_tints[pid])
                 
                 # add player to the Pygame sprite group and the lines list
                 self.lines[col].append(p)
@@ -186,15 +188,15 @@ class Drill:
         self.players.draw(self.surface)
         self.ball.draw(self.surface)
         
-    def move_players(self, speed: int):
+    def update_players(self, adjusted_speed: float):
         '''Move all the players in the moving_players list.
         
         Args:
-            speed (int): The speed of the players in the drill
+            adjusted_speed (float): The speed of the players in the drill, already adjusted by delta time.
         '''
         moving = False
         for player in self.moving_players:
-            still_moving = player.move(speed)
+            still_moving = player.update(adjusted_speed)
             if still_moving:
                 moving = True
                 
@@ -293,7 +295,7 @@ class Drill:
         Args:
             total_passes (int, optional): The total number of passes the drill was run. Defaults to 10.
         '''
-        Utils.printCyan(f"Total passes: {total_passes}")
+        utils.printCyan(f"Total passes: {total_passes}")
         
         players = self.get_and_sort_players()
         for player in players:
@@ -302,9 +304,9 @@ class Drill:
                 percentage_str = f'{percentage:.1f}'
                 s = f"Player {player.id:>3} oscillated {player.oscillation_count:>4} times ({percentage_str:>5}% of the drill ). Their first oscillation was on pass {player.pass_count_of_first_oscillation:>3}."
                 
-                Utils.printRed(s) if percentage >= 2 else Utils.printGreen(s)
+                utils.printRed(s) if percentage >= 2 else utils.printGreen(s)
             else:
-                Utils.printGreen(f"Player {player.id} did not oscillate.")
+                utils.printGreen(f"Player {player.id} did not oscillate.")
 
     def get_and_sort_players(self) -> list:
         '''Get all the players in the drill and sort them by id.

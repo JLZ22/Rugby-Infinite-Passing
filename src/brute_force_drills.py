@@ -1,5 +1,5 @@
 from Drill import Drill
-import Utils
+import utils
 import argparse
 import yaml
 
@@ -30,12 +30,12 @@ def run_drills(max_lines: int, max_players_coefficient: int, num_iterations: int
                 txt = f"No oscillations for {num_players:>3} players.\n"
                 num_instances[num_lines] += 1
                 save += txt
-                Utils.printGreen(txt, end="")
+                utils.printGreen(txt, end="")
         
         if not contains_success:
             txt = f"No successful runs for {num_lines:>3} lines over following range of players: {player_range}.\n"
-            save += Utils.formatRed(f"No successful runs for {num_lines:>3} lines over following range of players: {player_range}.\n")
-            Utils.printRed(txt, end="")
+            save += utils.formatRed(f"No successful runs for {num_lines:>3} lines over following range of players: {player_range}.\n")
+            utils.printRed(txt, end="")
 
     save += "\n\n" + "-" * 25 + "\n\n"
     instance_report = ""

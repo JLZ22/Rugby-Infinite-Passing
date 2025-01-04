@@ -1,5 +1,5 @@
 import pygame
-import Utils
+import utils
 
 class SimulationObject(pygame.sprite.Sprite):
     '''A simulation object in the drill.
@@ -19,7 +19,7 @@ class SimulationObject(pygame.sprite.Sprite):
         super().__init__()
         
         img = pygame.image.load(img_path).convert_alpha()
-        self.image = pygame.transform.smoothscale(img, Utils.get_new_dims(20, img))
+        self.image = pygame.transform.smoothscale(img, utils.get_new_dims(20, img))
         self.rect = self.image.get_rect()
         self.rect.center = self.target = (x,y)
         self.path = []
@@ -51,11 +51,11 @@ class SimulationObject(pygame.sprite.Sprite):
         ]
         self.target = self.path.pop(0)
         
-    def move(self, speed: int) -> bool:
+    def update(self, adjusted_speed: float) -> bool:
         '''Move according to the path defined in 'self.path'. 
 
         Args:
-            speed (int): The speed at which to move.
+            adjusted_speed (float): The speed at which to move, already adjusted by delta time.
 
         Returns:
             bool: True if there are still instructions in the path array, otherwise False.
@@ -71,15 +71,15 @@ class SimulationObject(pygame.sprite.Sprite):
         dy = target_y - current_y
         distance = (dx**2 + dy**2) ** 0.5
 
-        if distance <= speed:
+        if distance <= adjusted_speed:
             self.rect.center = self.target
             if self.path:
                 self.target = self.path.pop(0)
             else:
                 self.target = None
         else:
-            step_x = int(speed * (dx / distance))
-            step_y = int(speed * (dy / distance))
+            step_x = adjusted_speed * (dx / distance)
+            step_y = adjusted_speed * (dy / distance)
             self.rect.move_ip(step_x, step_y)
 
         return True  # Still moving

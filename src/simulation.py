@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     '''
     parser = argparse.ArgumentParser(description='Run a simulation of infinite passing.')
     
-    parser.add_argument("--speed", help="Speed of the drill", default=10, type=int)
+    parser.add_argument("--speed", help="Speed of the drill", default=300, type=int)
     parser.add_argument("--players", help="Number of players", default=10, type=int)
     parser.add_argument("--lines", help="Number of lines", default=4, type=int)
     parser.add_argument("--start-line", help="Starting line", default=0, type=int)
@@ -47,7 +47,7 @@ def parse_args() -> argparse.Namespace:
     args.player_tints = {}
     
     if args.example1:
-        args.speed = 10
+        args.speed = 300
         args.players = 5
         args.display = True
         args.lines = 4
@@ -56,7 +56,7 @@ def parse_args() -> argparse.Namespace:
         args.verbose = True
         args.player_tints = {1: THECOLORS["red"]}
     elif args.example2:
-        args.speed = 15
+        args.speed = 300
         args.players = 7
         args.display = True
         args.lines = 4
@@ -76,10 +76,10 @@ if __name__ == "__main__":
         starting_line=args.start_line,
         player_tints=args.player_tints
         )
-    
+        
     drill.run(
         speed=args.speed, 
         total_passes=args.passes, 
         display=args.display,
         verbose=args.verbose
-    )
+        )
