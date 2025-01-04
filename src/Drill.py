@@ -45,7 +45,7 @@ class Drill:
         self.direction = 'right'
         self.starting_line = self.line_with_ball = starting_line
         self.has_oscillators = False # Flag to check if any player has oscillated
-        self.moving_players = [] # List of players whose paths have been changed
+        self.moving_players = set() # List of players whose paths have been changed
         self.lines = [[] for _ in range(num_lines)]
         self.ball = SimulationObject('../assets/ball.png', 0, 0)
         utils.tint_image(self.ball.image, THECOLORS['orange'])
@@ -201,7 +201,7 @@ class Drill:
                 moving = True
                 
         if not moving:
-            self.moving_players = []
+            self.moving_players.clear()
         self.players_moving = moving
                 
     def is_last_line(self):
@@ -255,7 +255,7 @@ class Drill:
             target_x = self.lines[next_line][-1].rect.center[0]
             target_y = self.lines[next_line][-1].rect.center[1] + ROW_GAP
             player.set_path(target_x, target_y)
-            self.moving_players.append(player)
+            self.moving_players.add(player)
             
             # set the path for the ball to move in the Pygame display
             next_first = self.lines[next_line][0]
@@ -265,7 +265,7 @@ class Drill:
             # set path to shift all the players in the previous line up except the player who is passing
             for p in self.lines[curr_line][1:]:
                 p.set_path(p.rect.center[0], p.rect.center[1] - ROW_GAP)
-                self.moving_players.append(p)
+                self.moving_players.add(p)
                 
             self.players_moving = True
             self.ball_moving = True
