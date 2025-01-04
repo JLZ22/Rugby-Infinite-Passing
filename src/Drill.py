@@ -31,7 +31,7 @@ class Drill:
         '''
         # Pygame attributes/setup
         pygame.init()
-        self.fps = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
         self.surface = pygame.display.set_mode((1000, 1000))
         pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
         self.players_moving = False # The player that is currently moving in the Pygame display
@@ -48,7 +48,7 @@ class Drill:
         self.moving_players = [] # List of players whose paths have been changed
         self.lines = [[] for _ in range(num_lines)]
         self.ball = SimulationObject('../assets/ball.png', 0, 0)
-        Utils.tint_image(self.ball.image, THECOLORS['white'])
+        Utils.tint_image(self.ball.image, THECOLORS['orange'])
         self.init_lines(player_tints)
         
     def run(self, total_passes: int = 10, verbose: bool = True, display: bool = True, speed: int = 5):        
@@ -81,13 +81,13 @@ class Drill:
             int: The number of passes that were completed before the simulation was stopped.
         '''
         pass_count = 0
-        while True:      
+        while True:                  
             if self.check_exit_conditions(total_passes, pass_count):
                 pygame.quit()
                 break
             
             if self.ball_moving:
-                self.ball_moving = self.ball.move(speed)
+                self.ball_moving = self.ball.move(speed )
             elif self.players_moving:
                 self.move_players(speed)
                 
@@ -96,11 +96,12 @@ class Drill:
                     pass_count += 1
             else:
                 self.pass_ball(pass_count, display=True)
+            
+            self.surface.fill(THECOLORS['azure4'])            
                     
-            self.surface.fill(THECOLORS['darkgreen'])            
             self.draw_all()
-            pygame.display.update()
-            self.fps.tick(30)
+            pygame.display.flip()
+            self.clock.tick(30)
             
         return pass_count
 

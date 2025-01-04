@@ -1,4 +1,5 @@
 import pygame
+import Utils
 
 class SimulationObject(pygame.sprite.Sprite):
     '''A simulation object in the drill.
@@ -18,7 +19,7 @@ class SimulationObject(pygame.sprite.Sprite):
         super().__init__()
         
         img = pygame.image.load(img_path).convert_alpha()
-        self.image = pygame.transform.scale(img, (25, 25))
+        self.image = pygame.transform.smoothscale(img, Utils.get_new_dims(20, img))
         self.rect = self.image.get_rect()
         self.rect.center = self.target = (x,y)
         self.path = []
@@ -77,8 +78,8 @@ class SimulationObject(pygame.sprite.Sprite):
             else:
                 self.target = None
         else:
-            step_x = speed * (dx / distance)
-            step_y = speed * (dy / distance)
+            step_x = int(speed * (dx / distance))
+            step_y = int(speed * (dy / distance))
             self.rect.move_ip(step_x, step_y)
 
         return True  # Still moving

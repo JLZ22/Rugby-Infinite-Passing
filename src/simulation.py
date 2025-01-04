@@ -27,11 +27,11 @@ def parse_args() -> argparse.Namespace:
     '''
     parser = argparse.ArgumentParser(description='Run a simulation of infinite passing.')
     
-    parser.add_argument("--speed", help="Speed of the drill", default=10)
-    parser.add_argument("--players", help="Number of players", default=10)
-    parser.add_argument("--lines", help="Number of lines", default=4)
-    parser.add_argument("--start-line", help="Starting line", default=0)
-    parser.add_argument("--passes", help="Number of passes", default=10)
+    parser.add_argument("--speed", help="Speed of the drill", default=10, type=int)
+    parser.add_argument("--players", help="Number of players", default=10, type=int)
+    parser.add_argument("--lines", help="Number of lines", default=4, type=int)
+    parser.add_argument("--start-line", help="Starting line", default=0, type=int)
+    parser.add_argument("--passes", help="Number of passes", default=10, type=int)
     
     parser.add_argument("--no-display", help="Do not display the drill", action="store_false", dest="display")
     parser.add_argument("--display", help="Display the drill", action="store_true", dest="display")
@@ -44,6 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--example2", help="Run example 2", action="store_true")
 
     args = parser.parse_args()
+    args.player_tints = {}
     
     if args.example1:
         args.speed = 10
