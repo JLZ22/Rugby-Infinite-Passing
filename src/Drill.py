@@ -200,6 +200,8 @@ class Drill:
             if still_moving:
                 moving = True
                 
+        if not moving:
+            self.moving_players = []
         self.players_moving = moving
                 
     def is_last_line(self):
