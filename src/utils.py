@@ -122,3 +122,19 @@ def tint_image(surface: pygame.Surface, color: ColorValue) -> pygame.Surface:
         for y in range(h):
             a = surface.get_at((x, y))[3]
             surface.set_at((x, y), pygame.Color(r, g, b, a))
+            
+def get_new_dims(target_width: int, surface: pygame.Surface) -> Tuple[int, int]:
+    '''Calculate the new dimensions of the image based on the target width. 
+    Maintains the aspect ratio of the image.
+
+    Args:
+        target_width (int): The target width.
+        surface (pygame.Surface): The image.
+
+    Returns:
+        Tuple[int, int]: The new dimensions of the image.
+    '''
+    w, h = surface.get_size()
+    aspect_ratio = w / h
+    new_height = int(target_width / aspect_ratio)
+    return target_width, new_height
