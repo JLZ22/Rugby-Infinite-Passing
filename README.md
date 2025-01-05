@@ -1,6 +1,6 @@
 # Rugby Infinite Passing
 
-This is a personal interest project that aims to gain a better understanding of a common Rugby warmup drill called "infinite passing". The key features here are a Pygame demonstration of the drill and a brute force approach. 
+This is a personal interest project that aims to gain a better understanding of a common Rugby warmup drill called "infinite passing". The key features here are a Pygame demonstration of the drill and a brute force script which runs different combinations of lines and players for a number of iterations each and records the results. 
 
 ## Table of Contents
 
@@ -11,7 +11,7 @@ This is a personal interest project that aims to gain a better understanding of 
   * [Running the Code](#running-the-code)
     + [Pygame Demonstration](#pygame-demonstration)
     + [Brute Force Approach](#brute-force-approach)
-- [Insights](#insights)
+- [Insights](./Insights.md)
 
 ## What is "Infinite Passing"?
 
@@ -32,6 +32,9 @@ This goes on indefinitely until the coach stops the drill (or you get bored of w
 When I was first introduced to this drill, I noticed that some players would be stuck passing between two lines while others would visit multiple lines. This project is interested in understanding the conditions that lead to a player oscillating between two lines. While oscillation is not necessarily a bad thing (since you end up getting to pass in both directions anyways), it is interesting to see how the number of players and lines affect whether a player oscillates.
 
 A demonstration of an oscillating player and a non-oscillating player can be seen in the [Usage](#usage) section.
+
+<ins>Note:</ins> If a player enters one of the end lines, they will always return to the line they were originally from. Therefore, we are only interested in the players that enter the lines in between the first and last lines when counting oscillations.
+
 
 ## Usage
 
