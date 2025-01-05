@@ -1,10 +1,10 @@
-from SimulationObject import SimulationObject
+from game_object import GameObject
 
-class Player(SimulationObject):
+class Player(GameObject):
     '''A player in the drill. 
 
     Args:
-        SimulationObject (SimulationObject): A parent class for all objects in the simulation.
+        GameObject (GameObject): A parent class for all objects in the simulation.
     '''
     def __init__(self, x: int, y: int, player_id: int, curr_line: int):
         '''Constructor for Player class.

@@ -1,7 +1,7 @@
 import pygame
 import utils
 
-class SimulationObject(pygame.sprite.Sprite):
+class GameObject(pygame.sprite.Sprite):
     '''A simulation object in the drill.
 
     Args:
@@ -9,7 +9,7 @@ class SimulationObject(pygame.sprite.Sprite):
     '''
 
     def __init__(self, img_path: str, x: int, y: int):
-        '''Constructor for SimulationObject.
+        '''Constructor for GameObject.
 
         Args:
             img_path (str): The path to the image to be displayed for this sprite. 

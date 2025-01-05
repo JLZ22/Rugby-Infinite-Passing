@@ -1,10 +1,10 @@
 import pygame
 import utils
 
-from Player import Player
+from player import Player
 from pygame.locals import *
 from pygame.colordict import THECOLORS
-from SimulationObject import SimulationObject
+from game_object import GameObject
 
 ROW_GAP = 50
 COL_GAP = 80
@@ -47,7 +47,7 @@ class Drill:
         self.has_oscillators = False # Flag to check if any player has oscillated
         self.moving_players = set() # List of players whose paths have been changed
         self.lines = [[] for _ in range(num_lines)]
-        self.ball = SimulationObject('../assets/ball.png', 0, 0)
+        self.ball = GameObject('../assets/ball.png', 0, 0)
         utils.tint_image(self.ball.image, THECOLORS['orange'])
         self.init_lines(player_tints)
         

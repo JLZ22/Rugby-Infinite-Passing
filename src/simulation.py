@@ -1,6 +1,6 @@
 import argparse
 
-from Drill import Drill
+from drill import Drill
 from pygame.colordict import THECOLORS
 
 def parse_args() -> argparse.Namespace:

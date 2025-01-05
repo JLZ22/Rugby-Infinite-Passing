@@ -1,4 +1,4 @@
-from Drill import Drill
+from drill import Drill
 import utils
 import argparse
 import yaml
