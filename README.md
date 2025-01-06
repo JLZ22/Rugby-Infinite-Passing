@@ -1,11 +1,11 @@
 # Rugby Infinite Passing
 
-This is a personal interest project that aims to gain a better understanding of a common Rugby warmup drill called "infinite passing". The key features here are a Pygame demonstration of the drill and a brute force script which runs different combinations of lines and players for a number of iterations each and records the results. 
+This is a personal interest project that aims to gain a better understanding of how and when [oscillations](#what-are-oscillations) occur in a common Rugby warmup drill called [infinite passing](#what-is-infinite-passing). The key features here are a Pygame demonstration of the drill and a brute force script which runs different combinations of lines and players for a number of iterations each and records the results. 
 
 ## Table of Contents
 
-- [What is "Infinite Passing"?](#what-is-infinite-passing)
-- [Goal](#goal)
+- [What is infinite passing?](#what-is-infinite-passing)
+- [What are oscillations?](#what-are-oscillations)
 - [Usage](#usage)
   * [Dependencies](#dependencies)
   * [Running the Code](#running-the-code)
@@ -13,7 +13,7 @@ This is a personal interest project that aims to gain a better understanding of 
     + [Brute Force Approach](#brute-force-approach)
 - [Insights](./Insights.md)
 
-## What is "Infinite Passing"?
+## What is infinite passing?
 
 Players will line up in lines (typically no more than 5 or 6) and pass the ball according to the following steps. 
 
@@ -27,7 +27,7 @@ The ball can start in any line.
 
 This goes on indefinitely until the coach stops the drill (or you get bored of watching the demo). To see the demo, see the [Usage](#usage) section.
 
-## Goal 
+## What are oscillations?
 
 When I was first introduced to this drill, I noticed that some players would be stuck passing between two lines while others would visit multiple lines. This project is interested in understanding the conditions that lead to a player oscillating between two lines. While oscillation is not necessarily a bad thing (since you end up getting to pass in both directions anyways), it is interesting to see how the number of players and lines affect whether a player oscillates.
 

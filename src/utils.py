@@ -2,7 +2,9 @@ import pygame
 from pygame import Color
 from typing import Union, Tuple, Sequence
 
-ColorValue = Union[Color, int, str, Tuple[int, int, int], Tuple[int, int, int, int], Sequence[int]]
+RGB = Tuple[int, int, int]
+RGBA = Tuple[int, int, int, int]
+ColorValue = Union[Color, int, str, RGB, RGBA, Sequence[int]]
 
 def underlineText(text):
     return f"\033[4m{text}\033[0m"

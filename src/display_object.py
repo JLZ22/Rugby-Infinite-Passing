@@ -1,7 +1,7 @@
 import pygame
 import utils
 
-class GameObject(pygame.sprite.Sprite):
+class DisplayObject(pygame.sprite.Sprite):
     '''A simulation object in the drill.
 
     Args:
@@ -9,7 +9,7 @@ class GameObject(pygame.sprite.Sprite):
     '''
 
     def __init__(self, img_path: str, x: int, y: int):
-        '''Constructor for GameObject.
+        '''Constructor for DisplayObject.
 
         Args:
             img_path (str): The path to the image to be displayed for this sprite. 
@@ -50,6 +50,15 @@ class GameObject(pygame.sprite.Sprite):
             (target_x, target_y),  # Second right
         ]
         self.target = self.path.pop(0)
+        
+    def set_tint(self, color: utils.RGB | utils.RGBA | None):
+        '''Set the tint of the sprite.
+
+        Args:
+            color (RGB | RGBA): The color to tint the sprite.
+        '''
+        if color:
+            utils.tint_image(self.image, color)
         
     def update(self, adjusted_speed: float) -> bool:
         '''Move according to the path defined in 'self.path'. 

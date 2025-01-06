@@ -4,12 +4,10 @@ import utils
 from player import Player
 from pygame.locals import *
 from pygame.colordict import THECOLORS
-from game_object import GameObject
+from display_object import GameObject
 
 ROW_GAP = 50
 COL_GAP = 80
-RGB = tuple[int, int, int]
-RGBA = tuple[int, int, int, int]
 
 class Drill:
     '''Manages the players in the drill and runs the pygame simulation.
@@ -19,8 +17,8 @@ class Drill:
         num_lines: int = 4, 
         num_players: int = 15, 
         starting_line: int = 0, 
-        player_tints: dict[int, RGB | RGBA] = {}
-        ):
+        player_tints: dict[int, utils.RGB | utils.RGBA] = {}
+    ):
         '''Constructs a drill.
 
         Args:
@@ -113,6 +111,7 @@ class Drill:
         Args:
             total_passes (int): The number of passes the drill is run for.
         '''
+        
         for i in range(total_passes):
             self.pass_ball(i, display=False)
 
@@ -142,7 +141,7 @@ class Drill:
         
         return False
         
-    def init_lines(self, player_tints: dict[int, RGB | RGBA]):
+    def init_lines(self, player_tints: dict[int, utils.RGB | utils.RGBA]):
         '''Instantiate the players and distribute them into lines from left to right.
         Colors the players based on the player_tints dictionary. Ignores any player ids 
         that are not in the dictionary and any ids that are not associated with players.

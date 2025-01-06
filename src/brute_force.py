@@ -1,14 +1,13 @@
 from drill import Drill
 import utils
 import argparse
-import yaml
 
 '''
 Runs every combination of lines and players up to max_lines and max_players_coefficient * max_lines
-and runs num_iterations for each combination. Prints out results if there are no oscillations or 
+and runs num_passes for each combination. Prints out results if there are no oscillations or 
 if there are no successful runs for a given number of lines.
 '''
-def run_drills(max_lines: int, max_players_coefficient: int, num_iterations: int) -> str:
+def run_drills(max_lines: int, max_players_coefficient: int, num_passes: int) -> str:
     save = ""
     num_instances = [0] * (max_lines + 1)
     num_instances[0] = -1
@@ -17,12 +16,12 @@ def run_drills(max_lines: int, max_players_coefficient: int, num_iterations: int
     for num_lines in range(2, max_lines + 1):
         contains_success = False
         player_range = range(num_lines + 1, num_lines * max_players_coefficient + 1)
-        txt = f'{num_lines} lines | {num_iterations:,} iterations' + '-' * 25 + '\n'
+        txt = f'{num_lines} lines | {num_passes:,} iterations' + '-' * 25 + '\n'
         save += txt
         print(txt, end="")
         for num_players in player_range:
             drill = Drill(num_lines, num_players)
-            r = drill.run(num_iterations, verbose=False)
+            r = drill.run(num_passes, verbose=False, display=False)
             del drill 
 
             if not r:
@@ -59,42 +58,25 @@ def run_drills(max_lines: int, max_players_coefficient: int, num_iterations: int
     save += instance_report
     return save
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Find the line + player combinations that do not have oscillations over a given number of passes.")
+    parser.add_argument("--max-lines", help="Maximum number of lines to test.", default=100, type=int)
+    parser.add_argument("--coefficient", help="This number is multiplied by the number of lines to determine the maximum number of players for a given number of lines.", default=10, type=int)
+    parser.add_argument("--passes", help="Number of passes to run for each combination of lines and players.", default=1000, type=int)
+
+    return parser.parse_args()
 
 '''
 Performs a brute force search for the number of lines and players that will not have oscillations.
-
-Example of a valid config file:
-
-max lines: 100
-players coefficient: 10
-iterations: 1000
 '''
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run a drill.')
-    parser.add_argument("--config", help="Path to yaml config file.", default=None)
+    args = parse_args()
+    
+    m,c,p = args.max_lines, args.coefficient, args.passes
 
-    args = parser.parse_args()
-
-    max_lines = 100
-    max_players_coefficient = 10
-    num_iterations = 1000
-
-
-    if args.config:
-        with open(args.config, "r") as f:
-            config = yaml.safe_load(f)
-            if "max lines" in config and config["max lines"] > 1:
-                max_lines = config["max lines"]
-
-            if "players coefficient" in config and config["players coefficient"] > 1:
-                max_players_coefficient = config["players coefficient"]
-            
-            if "iterations" in config and config["iterations"] > 1:
-                num_iterations = config["iterations"]
-
-    save = run_drills(max_lines, max_players_coefficient, num_iterations)
+    save = run_drills(m, c, p)
 
     from pathlib import Path
 
-    with open(Path(f"results/Lines-{max_lines}_PlayersCoefficient-{max_players_coefficient}_Iterations-{num_iterations}.txt"), "w") as f:
+    with open(Path(f"results/Lines-{m}_PlayersCoefficient-{c}_Passes-{p}.txt"), "w") as f:
         f.write(save)
