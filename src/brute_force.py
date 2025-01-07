@@ -21,7 +21,7 @@ def run_drills(max_lines: int, max_players_coefficient: int, num_passes: int) ->
         print(txt, end="")
         for num_players in player_range:
             drill = Drill(num_lines, num_players)
-            r = drill.run(num_passes, verbose=False, display=False)
+            r = drill.run_hidden(num_passes, verbose=False)
             del drill 
 
             if not r:
@@ -51,16 +51,16 @@ def run_drills(max_lines: int, max_players_coefficient: int, num_passes: int) ->
 
     for key, val in range_report.items():
         if val[0] == val[1]:
-            instance_report += f"Line {val[0]}: {key} unique player counts result in no oscillations\n"
+            instance_report += f"{val[0]} lines: {key} unique player counts result in no oscillations\n"
         else:
-            instance_report += f"Lines {val[0]}-{val[1]}: {key} unique player counts result in no oscillations\n"
+            instance_report += f"{val[0]}-{val[1]} lines: {key} unique player counts result in no oscillations\n"
     print(instance_report)
     save += instance_report
     return save
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Find the line + player combinations that do not have oscillations over a given number of passes.")
-    parser.add_argument("--max-lines", help="Maximum number of lines to test.", default=100, type=int)
+    parser.add_argument("--max-lines", help="Maximum number of lines to test.", default=20, type=int)
     parser.add_argument("--coefficient", help="This number is multiplied by the number of lines to determine the maximum number of players for a given number of lines.", default=10, type=int)
     parser.add_argument("--passes", help="Number of passes to run for each combination of lines and players.", default=1000, type=int)
 
