@@ -1,7 +1,7 @@
 import pygame
 
-from drill import Drill
 from display_object import DisplayObject
+from player import Player
 from pygame.locals import *
 
 RGB = tuple[int, int, int]
@@ -16,93 +16,179 @@ class Display():
     
     def __init__(
         self, 
-        drill: Drill, 
+        start_line: int,
+        lines: list[list[Player]],
         speed: int, 
         win_size: tuple[int, int], 
         player_tints: dict[int, RGB | RGBA],
         ball_tint: RGB | RGBA,
         bg_color: RGB | RGBA,
         frame_rate: int, 
+        step: bool,
+        debug: bool,
     ):
         '''Constructor for Display class.
 
         Args:
-            drill (Drill): The backend that this display is visualizing.
+            start_line (int): The line the ball starts on.
+            lines (list[list[Player]]): A list of lines with players.
             speed (int): The rate at which sprites move.
             win_size (tuple[int, int]): The size of the window.
             player_tints (dict[int, RGB  |  RGBA]): A dictionary of player ids and their respective tints if any. Empty dict will result in using default png colors.
             ball_tint (RGB | RGBA): The tint of the ball. None will result in using default png color.
             bg_color (RGB | RGBA): The background color of the window.
             frame_rate (int): The frame rate of the simulation.
+            step (bool): Whether to run the simulation in step mode. This will pause the simulation after each pass.
+            User must press space to continue.
+            debug (bool): Whether to display the id of players instead of the image.
         '''
         pygame.init()
         pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
         self.clock = pygame.time.Clock()
         self.win = pygame.display.set_mode(win_size)
-        self.drill = drill
         self.speed = speed
-        self.players, self.ball = self.init_objects(player_tints, ball_tint)
         self.frame_rate = frame_rate
+        self.step = step
+        
+        self.lines = lines
+        self.start_line = start_line
+        self.players, self.player_dict, self.ball = self._init_objects(player_tints, ball_tint)
         self.ball_moving = False
-        self.players_moving = False
         self.moving_players = set()
         self.bg = bg_color
+        self.debug = debug
     
-    async def update(self) -> bool:
-        while self.ball_moving or self.players_moving:
+    def update(self) -> bool:
+        '''Perform one pass of the simulation, moving all game_objects 
+        until they complete their paths. 
+
+        Returns:
+            bool: True if the update successfully completes, False otherwise.
+        '''
+        if self.step:
+            start = False
+            while not start:
+                for event in pygame.event.get():
+                    start = event.type == KEYDOWN and event.key == K_SPACE
+                    break
+                    
+        
+        while self.ball_moving or len(self.moving_players) > 0:
             dt = self.clock.tick(self.frame_rate) / 1000
             adjusted_speed = self.speed * dt
             
             if self.check_exit_conditions():
-                pygame.quit()
+                self.close()
                 return False
             
             if self.ball_moving:
                 self.ball_moving = self.ball.update(adjusted_speed)
-            elif self.players_moving:
+            else:
+                to_remove = set()
+                
                 # move all players that need to be moved
                 for p in self.moving_players:
                     still_moving = p.update(adjusted_speed)
                     
-                    # if the player is no longer moving, remove them from the moving players set
                     if not still_moving:
-                        self.moving_players.remove(p)
+                        to_remove.add(p)
                 
-                # if there are no more moving players, set players_moving to False
-                self.players_moving = len(self.moving_players) != 0
+                # remove all players that have completed their paths
+                self.moving_players = self.moving_players - to_remove
             
             self.win.fill(self.bg)
             
             # draw all players
-            self.players.draw(self.win)
+            for p in self.players:
+                p.draw(self.win, self.debug)
             self.ball.draw(self.win)
             
             pygame.display.flip()
             
         return True
+    
+    def pass_ball(self, curr_line: int, target_line: int): 
+        '''Sets paths of ball and players for one pass from 
+        curr_line to target_line. 
         
-    def init_objects(
+        **IMPORTANT** This function assumes that 
+        the players have not yet been moved in the Drill object. 
+        Always move players to next line after calling this function.
+
+        Args:
+            curr_line (int): The line the ball is currently on.
+            target_line (int): The line the ball is passing to.
+        '''
+        # set the path of the ball
+        # 
+        # LOGIC: get the id of the first player in the target line from drill object 
+        # and find the corresponding sprite in the player_dict. Use that sprite's 
+        # center as the target.
+        ball_target = self.player_dict[self.get_id(target_line)].rect.center
+        self.ball.set_path(*ball_target)
+        self.ball_moving = True
+        
+        # set the path of the passing player
+        # 
+        # LOGIC: get id of last player in target line from drill object and find 
+        # corresponding sprite in player_dict. Since the player is going behind 
+        # the last player in the target line, add ROW_GAP to the y coordinate.
+        player_target_x, player_target_y = self.player_dict[self.get_id(target_line, first=False)].rect.center
+        player_target_y += ROW_GAP
+        moving_player = self.player_dict[self.get_id(curr_line)]
+        moving_player.set_path(player_target_x, player_target_y)
+        self.moving_players.add(moving_player)
+        
+        # set the path for shifting the rest of the players in the current line
+        for i in range(1, len(self.lines[curr_line])):
+            # get the player from the player_dict using id from drill object
+            player_id = self.lines[curr_line][i].id
+            player = self.player_dict[player_id]
+            
+            # set target location to one row above the player's current location
+            player_target_x, player_target_y = player.rect.center
+            player_target_y -= ROW_GAP
+            
+            # set path
+            player.set_path(player_target_x, player_target_y)
+            
+            # add player to set of moving players
+            self.moving_players.add(player)
+        
+    def _init_objects(
         self, 
         player_tints: dict[int, RGB | RGBA], 
         ball_tint: RGB | RGBA | None
-    ) -> tuple[list[DisplayObject], DisplayObject]:
-        lines = [[] for _ in range(self.drill.num_lines)]
+    ) -> tuple[set[DisplayObject], dict[int, DisplayObject], DisplayObject]:
+        '''Create all the game objects for the simulation. A variable 
+        number of players and one ball.
+
+        Args:
+            player_tints (dict[int, RGB  |  RGBA]): The tints of the players. This can be empty
+            which will result in using the default png colors.
+            ball_tint (RGB | RGBA | None): The tint of the ball. None will result in using the default png color.
+
+        Returns:
+            tuple[list[DisplayObject], dict[int, DisplayObject], DisplayObject]: A list of players, a dict that keeps track of each player's pid, and the ball.
+        '''
+        num_players = sum([len(line) for line in self.lines])
+        num_lines = len(self.lines)
+        player_dict = {}
         players = pygame.sprite.Group()
         
         pid = 0
-        num_rows = self.drill.num_players // self.drill.num_lines
         
-        for row in range(num_rows):
-            for col in range(self.drill.num_lines):
-                # check that we don't add more players than are in the drill
-                if pid >= self.drill.num_players:
+        for row in range(len(self.lines[0])):
+            for col in range(num_lines):
+                if pid >= num_players:
                     break
                 
                 # initialize player
                 p = DisplayObject(
                     '../assets/player.png',
-                    x=col * COL_GAP + 100,
-                    y=row * ROW_GAP + 100,
+                    col * COL_GAP + 100, # NOTE: i have no clue why switching x and y works
+                    row * ROW_GAP + 100, 
+                    pid
                 )
                 
                 # set player tint
@@ -110,17 +196,33 @@ class Display():
                     p.set_tint(player_tints[pid])
                     
                 # add player to the correct line and the group of players
-                lines[col].append(p)
+                player_dict[pid] = p
                 players.add(p)
                 
                 pid += 1
         
         # initialize ball
-        ball_x, ball_y = lines[self.drill.start_line][0].rect.center
-        ball = DisplayObject('../assets/ball.png', ball_x, ball_y)
+        ball_x, ball_y = player_dict[self.get_id(self.start_line)].rect.center
+        ball = DisplayObject('../assets/ball.png', ball_x, ball_y, -1)
         ball.set_tint(ball_tint)
         
-        return players, ball
+        return players, player_dict, ball
+    
+    def get_id(self, line_index: int, first: bool = True) -> int:
+        '''Get the player id of the first or last player in a line.
+
+        Args:
+            line_index (int): The index of the line.
+            first (bool, optional): True if the first player id is needed, 
+            False if the last player id is needed. Defaults to True.
+
+        Returns:
+            int: The player id.
+        '''
+        if first:
+            return self.lines[line_index][0].id
+        else:
+            return self.lines[line_index][-1].id
         
     def check_exit_conditions(self) -> bool:
         '''Checks if any of the following exit condiitons are fulfilled:
@@ -131,7 +233,7 @@ class Display():
             bool: True if any of the exit conditions are fulfilled, False otherwise.
         '''
         key = pygame.key.get_pressed()
-        if key[K_SPACE] or key[K_q]:
+        if key[K_q]:
             pygame.event.post(pygame.event.Event(QUIT))
         
         for event in pygame.event.get():

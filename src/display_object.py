@@ -8,13 +8,20 @@ class DisplayObject(pygame.sprite.Sprite):
         pygame (Sprite): A sprite object from pygame.
     '''
 
-    def __init__(self, img_path: str, x: int, y: int):
+    def __init__(
+        self, 
+        img_path: str, 
+        x: int, 
+        y: int, 
+        id: int,
+    ):
         '''Constructor for DisplayObject.
 
         Args:
             img_path (str): The path to the image to be displayed for this sprite. 
             x (int): Starting x position.
             y (int): Starting y position.
+            id (int): The unique id of the sprite.
         '''
         super().__init__()
         
@@ -23,6 +30,7 @@ class DisplayObject(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.target = (x,y)
         self.path = []
+        self.id = id
         
     def set_path(self, target_x: int, target_y: int, split_ratio: float=0.5):
         '''Define a path for this sprite that ends at the target 
@@ -93,10 +101,16 @@ class DisplayObject(pygame.sprite.Sprite):
 
         return True  # Still moving
     
-    def draw(self, surface: pygame.Surface):
+    def draw(self, surface: pygame.Surface, debug: bool = False):
         '''Draw the sprite on the surface.
 
         Args:
             surface (pygame.Surface): The surface to draw the sprite on.
+            debug (bool, optional): Whether to display the id of the sprite. Defaults to False.
         '''
-        surface.blit(self.image, self.rect)
+        if debug:
+            font = pygame.font.Font(None, 40)
+            text = font.render(str(self.id), True, (0,0,0))
+            surface.blit(text, self.rect.center)
+        else:
+            surface.blit(self.image, self.rect)

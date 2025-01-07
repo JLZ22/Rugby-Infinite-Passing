@@ -140,3 +140,12 @@ def get_new_dims(target_width: int, surface: pygame.Surface) -> Tuple[int, int]:
     aspect_ratio = w / h
     new_height = int(target_width / aspect_ratio)
     return target_width, new_height
+
+def print_ids(lines):
+    '''Print the player ids in each line.
+
+    Args:
+        lines (list[list[Player]]): The lines of players.
+    '''
+    for i, line in enumerate(lines):
+        print(f"Line {i}: {[p.id for p in line]}")
