@@ -48,7 +48,7 @@ pip install -r requirements.txt
 
 ### Running the Code
 
-These scripts both have command line arguments that can be used to modify the parameters of the drill. Use the `--help` or `-h` flag to see the available options.
+These scripts both have command line arguments that can be used to modify the parameters of the drill. Use the `-h` flag to see the available options.
 
 #### Pygame Demonstration
 
