@@ -268,6 +268,10 @@ class Display():
             elif isinstance(v, str):
                 assert v in pygame.colordict.THECOLORS, f"Must be a valid color name from pygame.colordict.THECOLORS. Got {v} instead."
                 obj_tints[k] = pygame.colordict.THECOLORS[v]
+            elif isinstance(v, tuple):
+                assert len(v) in [3, 4], f"Must be RGB or RGBA. Got {v} instead."
+                for i in v:
+                    assert isinstance(i, int) and i in range(256), f"Must be valid RGB or RGBA. Got {v} instead."
             else:
                 raise AssertionError(f"Value must be a list or string. Got {v} instead.")
         
