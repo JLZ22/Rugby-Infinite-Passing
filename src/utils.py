@@ -123,7 +123,11 @@ def tint_image(surface: pygame.Surface, color: ColorValue) -> pygame.Surface:
     for x in range(w):
         for y in range(h):
             a = surface.get_at((x, y))[3]
-            surface.set_at((x, y), pygame.Color(r, g, b, a))
+            try:
+                surface.set_at((x, y), pygame.Color(r, g, b, a))
+            except ValueError as e:
+                raise ValueError(f"Invalid color value: {color}.") from e
+                
             
 def get_new_dims(target_width: int, surface: pygame.Surface) -> Tuple[int, int]:
     '''Calculate the new dimensions of the image based on the target width. 

@@ -1,0 +1,9 @@
+# line_config.yaml
+# key is the line id and the value is the number of players in that line.
+0: 3
+1: 2
+2: 2
+3: 7
+4: 1
+
+start_line: 1

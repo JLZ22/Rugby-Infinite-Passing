@@ -20,8 +20,7 @@ class Display():
         lines: list[list[Player]],
         speed: int, 
         win_size: tuple[int, int], 
-        player_tints: dict[int, RGB | RGBA],
-        ball_tint: RGB | RGBA,
+        obj_tints: dict[int, RGB | RGBA],
         bg_color: RGB | RGBA,
         frame_rate: int, 
         step: bool,
@@ -34,14 +33,14 @@ class Display():
             lines (list[list[Player]]): A list of lines with players.
             speed (int): The rate at which sprites move.
             win_size (tuple[int, int]): The size of the window.
-            player_tints (dict[int, RGB  |  RGBA]): A dictionary of player ids and their respective tints if any. Empty dict will result in using default png colors.
-            ball_tint (RGB | RGBA): The tint of the ball. None will result in using default png color.
+            obj_tints (dict[int, RGB  |  RGBA]): A dictionary of player ids and their respective tints if any. Empty dict will result in using default png colors.
             bg_color (RGB | RGBA): The background color of the window.
             frame_rate (int): The frame rate of the simulation.
-            step (bool): Whether to run the simulation in step mode. This will pause the simulation after each pass.
-            User must press space to continue.
+            step (bool): Whether to run the simulation in step mode. This will pause the simulation after each pass. User must press space to continue.
             debug (bool): Whether to display the id of players instead of the image.
         '''
+        self.verify_obj_tints(obj_tints)
+        
         pygame.init()
         pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
         self.clock = pygame.time.Clock()
@@ -52,7 +51,7 @@ class Display():
         
         self.lines = lines
         self.start_line = start_line
-        self.players, self.player_dict, self.ball = self._init_objects(player_tints, ball_tint)
+        self.players, self.player_dict, self.ball = self._init_objects(obj_tints)
         self.ball_moving = False
         self.moving_players = set()
         self.bg = bg_color
@@ -157,54 +156,58 @@ class Display():
         
     def _init_objects(
         self, 
-        player_tints: dict[int, RGB | RGBA], 
-        ball_tint: RGB | RGBA | None
+        obj_tints: dict[int, RGB | RGBA]
     ) -> tuple[set[DisplayObject], dict[int, DisplayObject], DisplayObject]:
         '''Create all the game objects for the simulation. A variable 
         number of players and one ball.
 
         Args:
-            player_tints (dict[int, RGB  |  RGBA]): The tints of the players. This can be empty
+            obj_tints (dict[int, RGB  |  RGBA]): The tints of the players. This can be empty
             which will result in using the default png colors.
-            ball_tint (RGB | RGBA | None): The tint of the ball. None will result in using the default png color.
 
         Returns:
             tuple[list[DisplayObject], dict[int, DisplayObject], DisplayObject]: A list of players, a dict that keeps track of each player's pid, and the ball.
         '''
-        num_players = sum([len(line) for line in self.lines])
-        num_lines = len(self.lines)
         player_dict = {}
         players = pygame.sprite.Group()
-        
-        pid = 0
-        
-        for row in range(len(self.lines[0])):
-            for col in range(num_lines):
-                if pid >= num_players:
-                    break
+        col_counter = 0
+                
+        # ----
+        for col, line in enumerate(self.lines):
+            for row, player in enumerate(line):
+                pid = player.id
                 
                 # initialize player
                 p = DisplayObject(
                     '../assets/player.png',
-                    col * COL_GAP + 100, # NOTE: i have no clue why switching x and y works
+                    col * COL_GAP + 100,
                     row * ROW_GAP + 100, 
                     pid
                 )
                 
                 # set player tint
-                if pid in player_tints.keys():
-                    p.set_tint(player_tints[pid])
+                if pid in obj_tints.keys():
+                    p.set_tint(obj_tints[pid])
+                else:
+                    # rotate players colors for enhanced visibility
+                    if col_counter == 0:
+                        p_color = 'darkslategray'
+                    else:
+                        p_color = f'darkslategray{col_counter}'
+                    col_counter +=1 
+                    col_counter %= 4
+                    
+                    p.set_tint(pygame.colordict.THECOLORS[p_color])
                     
                 # add player to the correct line and the group of players
                 player_dict[pid] = p
                 players.add(p)
-                
-                pid += 1
         
         # initialize ball
         ball_x, ball_y = player_dict[self.get_id(self.start_line)].rect.center
         ball = DisplayObject('../assets/ball.png', ball_x, ball_y, -1)
-        ball.set_tint(ball_tint)
+        if -1 in obj_tints.keys():
+            ball.set_tint(obj_tints[-1])
         
         return players, player_dict, ball
     
@@ -242,5 +245,31 @@ class Display():
         
         return False
     
+    def verify_obj_tints(self, obj_tints: dict[int, RGB | RGBA | str]):
+        '''Verify that the obj_tints dictionary is correctly formatted. It 
+        must contain integer keys and values that are either RGB, RGBA, or
+        a valid color name from pygame.colordict.THECOLORS. The keys must 
+        be found in the player_dict or be -1 for the ball.
+
+        Args:
+            obj_tints (dict[int, RGB  |  RGBA  |  str]): The dictionary of object tints.
+        '''
+        if not obj_tints:
+            return
+        
+        for k, v in obj_tints.items():
+            assert isinstance(k, int), f"ID must be an integer. Got {k} instead."
+            
+            if isinstance(v, list):
+                assert len(v) in [3, 4], f"Must be RGB or RGBA. Got {v} instead."
+                for i in v:
+                    assert isinstance(i, int) and i in range(256), f"Must be valid RGB or RGBA. Got {v} instead."
+                obj_tints[k] = tuple(v)
+            elif isinstance(v, str):
+                assert v in pygame.colordict.THECOLORS, f"Must be a valid color name from pygame.colordict.THECOLORS. Got {v} instead."
+                obj_tints[k] = pygame.colordict.THECOLORS[v]
+            else:
+                raise AssertionError(f"Value must be a list or string. Got {v} instead.")
+        
     def close(self):
         pygame.quit()

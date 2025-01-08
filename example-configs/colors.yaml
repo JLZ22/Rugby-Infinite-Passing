@@ -1,0 +1,13 @@
+# colors.yaml
+# You can use the color names from the pygame.colordict.THECOLORS dictionary, RGB, or RGBA.
+# RGB/RGBA values must be between 0 and 255. They must also be passed in as a list as shown below.
+-2: azure4 # background
+-1:  # ball
+  - 255
+  - 165
+  - 0
+0: # player 0
+  - 0
+  - 0
+  - 0
+  - 255

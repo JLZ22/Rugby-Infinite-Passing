@@ -11,24 +11,44 @@ class Drill:
         num_lines: int = 4, 
         num_players: int = 15, 
         starting_line: int = 0, 
+        line_config: dict[int, int] | None = None,
     ):
-        '''Constructs a drill.
+        '''Constructs a drill. Note that the number of lines must be 
+        less than the number of players, the starting line must have 
+        at least two players, and the starting line must be less than 
+        number of lines. If the line_config is provided, num_lines and 
+        num_players will be ignored. Starting line will be ignored if 
+        it is provided in the line_config.
 
         Args:
             num_lines (int, optional): Number of lines in the drill. Defaults to 4.
             num_players (int, optional): Total number of players in the drill. Defaults to 15.
             starting_line (int, optional): The index of the line that starts with the ball. Defaults to 0.
+            line_config (dict[int, int] | None, optional): A dictionary where the key is the line id and the value 
+            is the number of players in that line. Defaults to None.
         '''
         assert num_lines < num_players + 1, "Number of lines must be less than number of players + 1"
         assert num_lines > 1, "Number of lines must be greater than 1"
         assert starting_line < num_lines, "Starting line must be less than number of lines"
-        self.num_lines = num_lines
-        self.num_players = num_players
-        self.direction = 'right'
+        self.verify_line_config(line_config)
+        
         self.starting_line = self.line_with_ball = starting_line
-        self.has_oscillators = False # Flag to check if any player has oscillated
         self.moving_players = set() # List of players whose paths have been changed
-        self.lines, self.players = self._init_lines()
+        self.has_oscillators = False # Flag to check if any player has oscillated
+        self.direction = 'right'
+        
+        if line_config:
+            init_result = self._init_lines_from_config(line_config)
+            self.num_lines = init_result[0]
+            self.num_players = init_result[1]
+            self.lines = init_result[2]
+            self.players = init_result[3]
+        else:
+            self.num_lines = num_lines
+            self.num_players = num_players
+            self.lines, self.players = self._init_lines_default()
+            
+        
         assert len(self.lines[self.starting_line]) > 1, "Starting line must have more than one player."
         
     def run_visible(
@@ -69,12 +89,12 @@ class Drill:
         if verbose:
             self.print_oscillations(total_passes)
         
-    def _init_lines(self) -> tuple[list[Player], set[Player]]:
+    def _init_lines_default(self) -> tuple[list[Player], set[Player]]:
         '''Instantiate the players and distribute them into lines from left to right.
         
         Returns:
             tuple[list[Player], set[Player]]: A list of lines with players and a set of all players.
-        '''
+        '''        
         lines = [[] for _ in range(self.num_lines)]
         players = set()
         pid = 0
@@ -98,6 +118,43 @@ class Drill:
                 
         lines[self.starting_line][0].has_ball = True
         return lines, players
+    
+    def _init_lines_from_config(
+        self, 
+        line_config: dict[int, int]
+    ) -> tuple[list[Player], set[Player]]:
+        '''Initialize the players and distribute them 
+        into lines based on the line configuration.
+
+        Args:
+            line_config (dict[int, int]): Line configuration where the key is 
+            the line id and the value is the number of players in that line.
+
+        Returns:
+            tuple[int, int, list[Player], set[Player]]: The number of lines, 
+            the number of players, a list of lines with players, and a set of all players.
+        '''
+        lines = []
+        players = set()
+        
+        # get and check the keys representing the line ids
+        keys = list(line_config.keys())
+        keys.sort()
+        assert all(keys[i] + 1 == keys[i + 1] for i in range(len(keys) - 1) for _ in [keys]), "Line ids must be consecutive."
+        
+        pid = 0
+        for k in keys:
+            line = [] 
+            for _ in range(line_config[k]):
+                p = Player(player_id=pid, curr_line=k)
+                line.append(p)
+                players.add(p)
+                pid += 1
+            lines.append(line)
+            
+        lines[self.starting_line][0].has_ball = True
+                
+        return len(keys), pid, lines, players
         
     def is_last_line(self):
         '''Check if the line with the ball is in one of the last lines.
@@ -183,3 +240,23 @@ class Drill:
                 utils.printRed(s) if percentage >= 2 else utils.printGreen(s)
             else:
                 utils.printGreen(f"Player {player.id} did not oscillate.")
+                
+    def verify_line_config(self, line_config: dict[int, int] | None):
+        '''Verify that the line configuration is valid. The line id must be an integer
+        greater than or equal to 0 and the number of players in a line must be greater than 0.
+        The key 'start_line' is also allowed. 
+
+        Args:
+            line_config (dict[int, int] | None): The line configuration to verify.
+
+        Raises:
+            KeyError: If an invalid key is found in the line configuration.
+        '''
+        if not line_config:
+            return
+        
+        for key, value in line_config.items():
+            assert isinstance(key, int), "Line id must be an integer."
+            assert isinstance(value, int), "Number of players in a line must be an integer."
+            assert key >= 0, "Invalid key in line configuration. Must be a non-negative integer or 'start_line'."
+            assert value > 0, "Number of players in a line must be greater than 0."
