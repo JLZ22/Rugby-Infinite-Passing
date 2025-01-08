@@ -31,7 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--debug", help="Display player ids insteda of images.", action="store_true", default=False)
     
     # config files
-    parser.add_argument("--colors", help="Yaml file with display object colors based on id. Ball id is -1. Background is -2.", default="../example-configs/colors.yaml")
+    parser.add_argument("--colors", help="Yaml file with display object colors based on id. Ball id is -1. Background is -2.", default=None)
     '''
     # colors.yaml
     # You can use the color names from the pygame.colordict.THECOLORS dictionary, RGB, or RGBA.
@@ -48,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     1: blueviolet
     '''
     
-    parser.add_argument("--line-config", help="Yaml file with line configuration. This will override --lines and --players.", default="../example-configs/line_config.yaml")
+    parser.add_argument("--line-config", help="Yaml file with line configuration. This will override --lines and --players.", default=None)
     '''
     # line_config.yaml
     # key is the line id and the value is the number of players in that line.
