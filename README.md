@@ -77,6 +77,10 @@ python3 simulation.py --example2
 python3 brute_force_drills.py
 ```
 
+## Notable Constraints
+
+1. The starting line must have at least two players. Since the starting line is the only line that loses a player without gaining one, it must have at least two players to ensure that it is not empty when the ball returns to it. this will never happen to any other line since they will always gain a player before losing one.
+
 ## Insights
 
 My observations and insights can be found in [Insights.md](./Insights.md).

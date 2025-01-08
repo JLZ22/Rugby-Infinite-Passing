@@ -1,6 +1,6 @@
 # Insights and Observations
 
-1. When a player $p$ enters a line with an even number of players excluding $p$, $p$ will not return to the line they entered from on their next pass (i.e. they will not oscillate). The opposite is true if the line has an odd number of players.
+1. When a player $p$ enters a line with an even number of players excluding $p$, $p$ will not return to the line they entered from on their next pass (i.e. they will not oscillate). The opposite is true if the line has an odd number of players. This only applies to the non-end lines. See [What are oscillations?](README.md#what-are-oscillations) for more information.
 <details>
 <summary>Proof</summary><br/>
 For this proof, we will use induction. 

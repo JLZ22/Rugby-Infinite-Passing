@@ -21,6 +21,7 @@ class Drill:
         '''
         assert num_lines < num_players + 1, "Number of lines must be less than number of players + 1"
         assert num_lines > 1, "Number of lines must be greater than 1"
+        assert starting_line < num_lines, "Starting line must be less than number of lines"
         self.num_lines = num_lines
         self.num_players = num_players
         self.direction = 'right'
@@ -28,6 +29,7 @@ class Drill:
         self.has_oscillators = False # Flag to check if any player has oscillated
         self.moving_players = set() # List of players whose paths have been changed
         self.lines, self.players = self._init_lines()
+        assert len(self.lines[self.starting_line]) > 1, "Starting line must have more than one player."
         
     def run_visible(
         self, 
