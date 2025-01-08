@@ -52,6 +52,8 @@ These scripts both have command line arguments that can be used to modify the pa
 
 #### Pygame Demonstration
 
+Note: The different colors just help to differentiate the players. They have no other significance. 
+
 ```bash
 python3 simulation.py
 ```
@@ -62,6 +64,8 @@ python3 simulation.py
 ```bash
 python3 simulation.py --example1
 ```
+
+The player in red goes from the second line to the third line and back to the second line without having reached the rightmost line. This is an example of a player oscillating between two lines.
 </details>
 <details>
 <summary>Example of a player not oscillating (follow the player in green)</summary>
@@ -69,6 +73,8 @@ python3 simulation.py --example1
 ```bash
 python3 simulation.py --example2
 ```
+
+The player in green goes from the second line to the third line. This is an example of a player not oscillating between two lines.
 </details>
 
 #### Brute Force Approach
