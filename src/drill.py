@@ -11,6 +11,7 @@ class Drill:
         num_lines: int = 4, 
         num_players: int = 15, 
         starting_line: int = 0, 
+        direction: str = 'right',
         line_config: dict[int, int] | None = None,
     ):
         '''Constructs a drill. Note that the number of lines must be 
@@ -24,18 +25,19 @@ class Drill:
             num_lines (int, optional): Number of lines in the drill. Defaults to 4.
             num_players (int, optional): Total number of players in the drill. Defaults to 15.
             starting_line (int, optional): The index of the line that starts with the ball. Defaults to 0.
+            direction (str, optional): The direction of the drill. Defaults to 'right'.
             line_config (dict[int, int] | None, optional): A dictionary where the key is the line id and the value 
             is the number of players in that line. Defaults to None.
         '''
         assert num_lines < num_players + 1, "Number of lines must be less than number of players + 1"
         assert num_lines > 1, "Number of lines must be greater than 1"
-        assert starting_line < num_lines, "Starting line must be less than number of lines"
+        assert direction in ['left', 'right'], "Direction must be 'left' or 'right'."
         self.verify_line_config(line_config)
         
         self.starting_line = self.line_with_ball = starting_line
         self.moving_players = set() # List of players whose paths have been changed
         self.has_oscillators = False # Flag to check if any player has oscillated
-        self.direction = 'right'
+        self.direction = direction
         
         if line_config:
             init_result = self._init_lines_from_config(line_config)
@@ -50,6 +52,7 @@ class Drill:
             
         
         assert len(self.lines[self.starting_line]) > 1, "Starting line must have more than one player."
+        assert self.starting_line < self.num_lines, "Starting line must be less than number of lines."
         
     def run_visible(
         self, 

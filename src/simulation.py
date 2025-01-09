@@ -23,6 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--lines", help="Number of lines", default=4, type=int)
     parser.add_argument("--start-line", help="Starting line", default=0, type=int)
     parser.add_argument("--passes", help="Number of passes", default=10, type=int)
+    parser.add_argument("--direction", help="Starting direction of the drill", default="right", choices=["right", "left"])
     
     parser.add_argument("--speed", help="Speed of the display", default=300, type=int)
     parser.add_argument("--silent", help="Do not print the oscillation data.", action="store_false", dest="verbose", default=True)
@@ -59,6 +60,8 @@ def parse_args() -> argparse.Namespace:
     
     # if you want to override the --start-line flag, add a key 'start_line'
     start_line: 0
+    # 
+    start_direction: right
     '''
     
     # examples 
@@ -87,7 +90,10 @@ def parse_args() -> argparse.Namespace:
                 assert isinstance(args.lines_dict, dict), "Line config file must be a dictionary."
                 if "start_line" in args.lines_dict:
                     args.start_line = args.lines_dict["start_line"]
+                if 'start_direction' in args.lines_dict:
+                    args.direction = args.lines_dict['start_direction']
                 args.lines_dict.pop("start_line", None)
+                args.lines_dict.pop("start_direction", None)
     
     # --- Examples ---
     if args.example1:
@@ -122,6 +128,7 @@ if __name__ == "__main__":
         num_lines=args.lines,
         num_players=args.players, 
         starting_line=args.start_line,
+        direction=args.direction,
         line_config=args.lines_dict,
     )
     

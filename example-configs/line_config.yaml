@@ -6,4 +6,5 @@
 3: 7
 4: 1
 
-start_line: 1
+start_line: 3
+start_direction: left
