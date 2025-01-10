@@ -1,3 +1,4 @@
+import math
 import utils
 
 from player import Player
@@ -125,7 +126,7 @@ class Drill:
     def _init_lines_from_config(
         self, 
         line_config: dict[int, int]
-    ) -> tuple[list[Player], set[Player]]:
+    ) -> tuple[int, int, list[Player], set[Player]]:
         '''Initialize the players and distribute them 
         into lines based on the line configuration.
 
@@ -263,3 +264,41 @@ class Drill:
             assert isinstance(value, int), "Number of players in a line must be an integer."
             assert key >= 0, "Invalid key in line configuration. Must be a non-negative integer or 'start_line'."
             assert value > 0, "Number of players in a line must be greater than 0."
+            
+    def get_player(self, player_id: int) -> Player:
+        '''Get the player with the given id.
+
+        Args:
+            player_id (int): The id of the player to get.
+
+        Returns:
+            Player: The player with the given id.
+        '''
+        assert player_id in range(self.num_players), "Invalid player id."
+        
+        for player in self.players:
+            if player.id == player_id:
+                return player
+    
+    def will_oscillate(
+        self, 
+        player_id: int, 
+        num_passes: int = math.inf
+    ) -> tuple[bool, int, tuple[int, int]]:
+        '''Returns data on whether a player will oscilalte over 
+        num_passes passes. The data includes a boolean indicating
+        if the player will oscillate, the pass on which the player 
+        oscillates, and the two lines that the player oscillates between.
+
+        Args:
+            player_id (int): The id of the player to check.
+            num_passes (int, optional): The number of passes to check. Defaults to math.inf.
+
+        Returns:
+            tuple[bool, int, tuple[int, int]]: Data on whether the player will oscillate over num_passes passes.
+        '''
+        assert player_id in range(self.num_players), "Invalid player id."
+        assert num_passes > 0, "Number of passes must be greater than 0."
+        
+        player = self.get_player(player_id)
+        # TODO
