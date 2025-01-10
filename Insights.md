@@ -1,6 +1,10 @@
 # Insights and Observations
 
-1. When a player $p$ enters a line with an even number of players excluding $p$, $p$ will not return to the line they entered from on their next pass (i.e. they will not oscillate). The opposite is true if the line has an odd number of players. This only applies to the non-end lines. See [What are oscillations?](README.md#what-are-oscillations) for more information.
+For these insights, the restrictions do not apply to the end lines because oscillations cannot happen between an intermediate line and an end line. See [What are Oscillations?](./README.md/#what-are-oscillations) for the formal definition of an oscillation. 
+
+## Lemma 1
+
+When a player $p$ enters a line with an even number of players excluding $p$, $p$ will not return to the line they entered from on their next pass (i.e. they will not oscillate). The opposite is true if the line has an odd number of players. This only applies to the non-end lines. 
 <details>
 <summary>Proof</summary><br/>
 For this proof, we will use induction. 
@@ -37,4 +41,19 @@ We have shown that if a player enters a line with an even number of players, the
 
 </details><br/>
 
-2. In any valid drill, if all of the lines excluding the first and last line have an even number of players, then no players will ever oscillate. We are excluding the first and last line because they are the only lines that require the players to go back to the line they were originally from. As such, these don't count as oscillations. This insight follows from the previous one. Conversely, if any of the lines excluding the first and last line have an odd number of players, then at least one player will oscillate.
+## Lemma 2
+
+Over infinite passes, the drill will never have a player oscillate if and only if the number of players in the starting line must be odd and the number of players in each intermediate line must are even. Conversely, the drill will have a player oscillate if and only if any of the intermediate lines have an odd number of players or the starting line has an even number of players.
+
+<details>
+<summary>Proof</summary>
+
+### Parity of the Starting Line
+
+The starting line must have an odd number of players. Assume that the starting line has an even number of players. On the first pass, the starting line will lose a player and become odd. When the ball returns to this line, the player that passed the ball will be entering a line with an odd number of players. By insight 1, this player will not return to the line they were originally from. Therefore, we can say that for the drill to never have a player oscillate, the starting line must have an odd number of players through proof by contradiction.
+
+### Parity of the Intermediate Lines
+
+This follows from [Lemma 1](#lemma-1). 
+
+</details>

@@ -29,12 +29,17 @@ This goes on indefinitely until the coach stops the drill (or you get bored of w
 
 ## What are oscillations?
 
+### Context
+
 When I was first introduced to this drill, I noticed that some players would be stuck passing between two lines while others would visit multiple lines. This project is interested in understanding the conditions that lead to a player oscillating between two lines. While oscillation is not necessarily a bad thing (since you end up getting to pass in both directions anyways), it is interesting to see how the number of players and lines affect whether a player oscillates.
 
+### Definition
+
+Formally, a player $p$ oscillates between lines $l_1$ and $l_2$ if $p$ enters $l_2$ from $l_1$ and then returns to $l_1$ from $l_2$ on the next pass without having reached one of the end lines. Note that this means if $l_2$ is one of the end lines, no oscillations occur. 
+
+### Demonstration
+
 A demonstration of an oscillating player and a non-oscillating player can be seen in the [Usage](#usage) section.
-
-<ins>Note:</ins> If a player enters one of the end lines, they will always return to the line they were originally from. Therefore, we are only interested in the players that enter the lines in between the first and last lines when counting oscillations.
-
 
 ## Usage
 
