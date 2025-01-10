@@ -296,9 +296,34 @@ class Drill:
 
         Returns:
             tuple[bool, int, tuple[int, int]]: Data on whether the player will oscillate over num_passes passes.
+            If the player will not oscillate, returns False, -1, (-1, -1).
         '''
         assert player_id in range(self.num_players), "Invalid player id."
         assert num_passes > 0, "Number of passes must be greater than 0."
         
+        oscillating_pass = -1
+        oscillating_lines = (-1, -1)
+        will_oscillate = False
+        
+        # -- Check against Lemma 2 --
+        
+        # if intermediate lines are all even, will_oscillate is False. Otherwise, True.
+        for l in self.lines[1:-1]:
+            if len(l) % 2 == 1:
+                will_oscillate = True
+                break
+        
+        # if the starting line is even, will_oscillate is True. Otherwise, 
+        # depends on intermediate lines.
+        will_oscillate = len(self.lines[self.starting_line]) % 2 == 0 or will_oscillate
+        
+        # return early if will_oscillate is False --> we know that players will 
+        # never oscillate over infinite passes by Lemma 2
+        if not will_oscillate:
+            return will_oscillate, oscillating_pass, oscillating_lines
+        
+        # -- Check other conditions -- TODO: find what those are T-T
         player = self.get_player(player_id)
-        # TODO
+        start_line = player.curr_line
+        
+        return will_oscillate, 
