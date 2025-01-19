@@ -54,7 +54,7 @@ line 1   line 2   line 3   line 4
 8        9        10       11
 ```
 
-### Dependencies 
+## Dependencies 
 
 Install the required packages with 
 
@@ -62,11 +62,11 @@ Install the required packages with
 pip install -r requirements.txt
 ```
 
-### Running the Code
+## Running the Code
 
 These scripts both have command line arguments that can be used to modify the parameters of the drill. Use the `-h` flag to see the available options.
 
-#### Pygame Demonstration
+### Pygame Demonstration
 
 Note: The different colors just help to differentiate the players. They have no other significance. 
 
@@ -107,7 +107,7 @@ python3 will_oscillate.py
 
 For full documentation on command line arguments, use the `-h` flag.
 
-#### Brute Force Approach
+### Brute Force Approach
 
 ```bash
 python3 brute_force_drills.py
