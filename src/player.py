@@ -12,5 +12,5 @@ class Player():
         self.has_ball = False
         self.previous_line = -1
         self.oscillation_count = 0
-        self.iteration_of_first_oscillation = -1
+        self.pass_count_of_first_oscillation = -1
         self.curr_line = curr_line

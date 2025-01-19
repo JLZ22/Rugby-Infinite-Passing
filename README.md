@@ -43,6 +43,17 @@ A demonstration of an oscillating player and a non-oscillating player can be see
 
 ## Usage
 
+Notes:
+1. the indices of lines goes from 0 to $n-1$ from left to right where $n$ is the number of lines.
+2. the indices of the players goes from left to right and then top to bottom.
+
+```
+line 1   line 2   line 3   line 4
+0        1        2        3
+4        5        6        7
+8        9        10       11
+```
+
 ### Dependencies 
 
 Install the required packages with 
@@ -63,6 +74,8 @@ Note: The different colors just help to differentiate the players. They have no 
 python3 simulation.py
 ```
 
+For full documentation on command line arguments, use the `-h` flag.
+
 <details>
 <summary>Example of a player oscillating (follow the player in red)</summary>
 
@@ -81,6 +94,18 @@ python3 simulation.py --example2
 
 The player in green goes from the second line to the third line. This is an example of a player not oscillating between two lines.
 </details>
+
+### Determining if a Player Oscillates 
+
+Given a valid drill run for $n$ passes, we can determine if, when, and between which two lines any player $p$ will oscillate. To test this, we verify the projection by running the drill in hidden mode and comparing the results. 
+
+To run the projection, use the following command:
+
+```bash
+python3 will_oscillate.py
+```
+
+For full documentation on command line arguments, use the `-h` flag.
 
 #### Brute Force Approach
 

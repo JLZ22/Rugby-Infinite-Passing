@@ -56,6 +56,7 @@ class Display():
         self.moving_players = set()
         self.bg = bg_color
         self.debug = debug
+        self.pass_count = 0
     
     def update(self) -> bool:
         '''Perform one pass of the simulation, moving all game_objects 
@@ -101,6 +102,10 @@ class Display():
             for p in self.players:
                 p.draw(self.win, self.debug)
             self.ball.draw(self.win)
+            
+            font = pygame.font.Font(None, 36)
+            pass_count_text = font.render(f"Pass Count: {self.pass_count}", True, (255, 255, 255))
+            self.win.blit(pass_count_text, (10, 10))
             
             pygame.display.flip()
             
@@ -153,6 +158,8 @@ class Display():
             
             # add player to set of moving players
             self.moving_players.add(player)
+            
+        self.pass_count += 1
         
     def _init_objects(
         self, 
